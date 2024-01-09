@@ -1,0 +1,150 @@
+#include <TM1637Display.h>
+
+#define CLK 5  // Hubungkan pin CLK TM1637 ke pin 2 di Arduino Uno
+#define DIO 4  // Hubungkan pin DIO TM1637 ke pin 3 di Arduino Uno
+
+TM1637Display display(CLK, DIO);
+
+int digit1 = 0; // Digit pertama (C)
+int digit2 = 1; // Digit kedua (H)
+int digit3 = 2; // Digit ketiga
+int digit4 = 3; // Digit keempat
+
+int relayPin1 = 8; 
+int relayPin2 = 9;
+//int relayRedPin = 8;
+//int relayGreenPin = 9;
+int upButton = 2;
+int downButton = 3;
+
+//const int txPin = 6; //input tx dari keypad
+//const int rxPin = 7; //input rx dari keypad
+
+//int PTTButton = 12; // button ptt
+//int EMGButton = 7; // button EMG
+//int PriorityButton = 6; // button Priority
+
+int counterValue = 0;
+int val;
+int val1;
+
+
+
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  pinMode(upButton, INPUT_PULLUP);
+  pinMode(downButton, INPUT_PULLUP);
+//  pinMode(PTTButton, INPUT_PULLUP);
+//  pinMode(EMGButton, INPUT_PULLUP);
+//  pinMode(PriorityButton, INPUT_PULLUP);
+  pinMode(relayPin1, OUTPUT);
+  pinMode(relayPin2, OUTPUT);
+//  pinMode(relayRedPin, OUTPUT);
+//  pinMode(relayGreenPin, OUTPUT);
+  //pinMode(txPin, INPUT);
+  //pinMode(rxPin, INPUT);
+
+  display.setBrightness(0x0f); // Set kecerahan display (0x00 - 0x0f)
+  display.showNumberDecEx(counterValue, 0b11110000); // Tampilkan nilai awal counter
+
+  //Matikan relay saat awal
+//  digitalWrite(relayRedPin, LOW);
+//  digitalWrite(relayGreenPin, HIGH);
+  
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  sevenSegment();
+  fungsiButton();
+  //fungsiTampilTxRx();
+  //fungsiPilotLamp();
+  
+}
+
+void sevenSegment()
+{
+  byte charC[] = {0x39}; // 0x39 adalah kode segmen untuk huruf "C"
+  byte charH[] = {0x76}; // 0x76 adalah kode segmen untuk huruf "H"
+  display.setSegments(charC, 1, digit1); // Tampilkan "C" di digit pertama
+  display.setSegments(charH, 1, digit2); // Tampilkan "H" di digit kedua
+}
+
+
+void fungsiButton()
+{
+  val  = digitalRead(upButton);
+  val1 = digitalRead(downButton);
+  if(val == HIGH)
+  {
+    digitalWrite(relayPin1, HIGH);
+  }else
+  {
+    counterValue++;
+    digitalWrite(relayPin1, LOW);
+
+    if(counterValue > 22){
+      counterValue = 0;
+    }
+    display.showNumberDecEx(counterValue, 0b11110000);
+    delay(200);
+  }
+
+  if(val1 == HIGH)
+  {
+    digitalWrite(relayPin2, HIGH);
+  }else
+  {
+    counterValue--;
+    digitalWrite(relayPin2, LOW);
+
+    if(counterValue < 0){
+      counterValue = 22
+      ;
+    }
+    display.showNumberDecEx(counterValue, 0b11110000);
+    delay(200);
+  }
+}
+
+void fungsiTampilTxRx()
+{
+//  int txValue = digitalRead(txPin);
+//  int rxValue = digitalRead(rxPin);
+//
+//  //Baca Nilai TX
+//  Serial.print("TX : ");
+//  Serial.println(txValue);
+//
+//  //Baca Nilai RX
+//  Serial.print("RX : ");
+//  Serial.println(rxValue);
+
+  delay(1000);
+}
+
+
+//void fungsiPilotLamp()
+//{
+//  int txValue = digitalRead(txPin);
+//  int rxValue = digitalRead(rxPin);
+//
+//  //jika tombol keypad ditekan, aktifkan relay merah
+//  if(txValue == HIGH)
+//  {
+//    digitalWrite(relayRedPin, LOW);
+//  }else
+//  {
+//    digitalWrite(relayRedPin, HIGH);
+//  }
+//
+//  //jika ada yang terhubung ke sinyal rx, aktifkan relay hijau
+//  if(rxValue == HIGH)
+//  {
+//    digitalWrite(relayGreenPin, LOW);
+//  }else{
+//    digitalWrite(relayGreenPin, HIGH);
+//  }
+//}
